@@ -33,7 +33,7 @@ Dev cost:68 avg cost per instance 0.0453635757171
 ...
 ```
 
-In terms of the input data format, your training data should look like: 
+In terms of the input data format, your data should look like: 
 
 ```
 [   "-1 1:0.1 2:0.5 9:0.1",
@@ -42,6 +42,8 @@ In terms of the input data format, your training data should look like:
     "+1 1:0.4 2:0.7 9:0.4",
 ]
 ```
+
+Where the first argument is whether the instance is positive or negative, and the other part of the instance specifies what the costs of each label for that instance is.
 
 
 For any questions or bugs please contact Andreas Vlachos (http://www.cl.cam.ac.uk/~av308/). If you find this software useful please acknowledge it using the link to this project. Thanks!
