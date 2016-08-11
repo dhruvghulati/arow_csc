@@ -8,6 +8,23 @@ This is a simple and efficient implementation of the Adaptive Regularization of 
 
 In order to run it and see how the API is used, please download a version of the 20 newsgroups dataset available here: http://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html#news20.binary and run (remember to install Liang Huang's sparse vector package first):
 
-python arow.py news20.binary
+`python arow.py news20.binary`
+
+You should see the following:
+
+```
+Reading the data
+training data: 14997 instances
+Training with 14997 instances
+Training with param=0.01 on 13497 instances
+Training error rate in round 0 : 0.110246721494
+...
+Training error rate in round 9 : 0.00296362154553
+Final training error rate=0.00133362969549
+Final training cost=18
+testing on 1499 instances
+Dev cost:68 avg cost per instance 0.0453635757171
+...
+```
 
 For any questions or bugs please contact Andreas Vlachos (http://www.cl.cam.ac.uk/~av308/). If you find this software useful please acknowledge it using the link to this project. Thanks!
