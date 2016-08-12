@@ -12,6 +12,7 @@ import numpy
 
 
 def instance_from_svm_input(svm_input):
+    # TODO - this should be adapted for my input
     """
     Generate an Instance from a SVMLight input.
     """
@@ -73,6 +74,8 @@ class Instance(object):
     def __str__(self):
         costs_list = [label + ':' + str(self.costs[label]) for label in self.costs]
         feat_list = [feat + ':' + str(self.featureVector[feat]) for feat in self.featureVector]
+        # print "Costs list is",costs_list
+        # print "Feature list is",feat_list
         return ','.join(costs_list) + '\t' + ' '.join(feat_list)
 
     @staticmethod
@@ -199,9 +202,16 @@ class AROW(object):
         totalCorrects = 0
         totalIncorrects = 0
         sumEntropies = 0
-        for instance in instances:
+        predictions = []
+        print "This is the number of instances",len(instances)
+        for i,instance in enumerate(instances):
+            print "This is instance number ", i
             prediction = self.predict(instance, False, probabilities)
-            # This is without probabilities, with probabilities we want the average entropy*cost 
+            # print "Prediction is ",prediction.label,"for instance ",i
+            predictions.append(prediction.label)
+            # This is without probabilities, with probabilities we want the average entropy*cost
+            print "Instance costs are",instance.costs
+            print "Prediction label is",prediction.label
             if probabilities:
                 if instance.costs[prediction.label] == 0:
                     sumLogProbCorrect -= math.log(prediction.label2prob[prediction.label],2)
@@ -233,7 +243,8 @@ class AROW(object):
             print sumLogProbCorrect
             return sumLogProbCorrect
         else:
-            return totalCost
+            # print "Predictions are ",predictions
+            return totalCost,predictions
 
     def _initialize_vectors(self, instances, averaging, rounds, adapt):
         """
@@ -346,6 +357,8 @@ class AROW(object):
                 prediction = self.predict(instance)
                 # so if the prediction was incorrect
                 # we are no longer large margin, since we are using the loss from the cost-sensitive PA
+                # print "Instance costs are",instance.costs
+                # print "Prediction label is",prediction.label
                 if instance.costs[prediction.label] > 0:
                     errorsInRound += 1
                     costInRound += instance.costs[prediction.label]
@@ -415,6 +428,10 @@ class AROW(object):
             print "testing on " + str(len(testingInstances)) + " instances"
             # Test on the dev for the weight vector produced in each round
             devCost = classifier.batchPredict(testingInstances)
+            # This should be changed
+            devCost = devCost[0]
+            # print "Dev cost is",devCost,"type",type(devCost)
+            # print "Testing instances is",testingInstances,"type",type(testingInstances)
             print "Dev cost:" + str(devCost) + " avg cost per instance " + str(devCost/float(len(testingInstances)))
 
             if devCost < lowestCost:
@@ -522,37 +539,62 @@ if __name__ == "__main__":
     import random
     random.seed(13)           
     numpy.random.seed(13)
-    dataLines = open(sys.argv[1]).readlines()
+    # open_cost_1.dat
+    trainDataLines = open(sys.argv[1]).readlines()
+    # test.dat
+    testDataLines = open(sys.argv[2]).readlines()
+    # open_cost_1.predict
+    predictFile = sys.argv[3]
 
-    instances = []
+    trainingInstances = []
+    testingInstances = []
     classifier_p = AROW()
-    print "Reading the data"
-    for line in dataLines:
-        details = line.split()
+    print "Reading training data\n"
+    for i,line in enumerate(trainDataLines):
+        print "Reading line ", i
+        # No need for instance numbers
+        details = line.split("|")
+        # print "Details are",details
         costs = {}
         featureVector = mydefaultdict(mydouble)
-        
-        if details[0] == "-1":
-            costs["neg"] = 0
-            costs["pos"] = 1
-        elif details[0] == "+1":
-            costs["neg"] = 1
-            costs["pos"] = 0
+        costDict = details[0].split()
+        featureDict = details[1].split()
+        for pair in costDict:
+            label, cost = pair.split(":")
+            costs[label] = float(cost)
 
-        for feature in details[1:]:
-            featureID, featureVal = feature.split(":")
-            featureVector[featureID] = float(featureVal)
+        # print "Costs are",costs
+        for featureID,featureVal in enumerate(featureDict):
+            # print "Feature is ",featureVal
+            # print "Internal is ",intern(featureVal)
+            # print "Unique ID is", id(featureVal)
+            # print "Real Unique ID is", id(intern(featureVal))
+            featureVector[featureID] = float(id(intern(featureVal)))
             #featureVector["dummy"+str(len(instances))] = 1.0
             #featureVector["dummy2"+str(len(instances))] = 1.0
             #featureVector["dummy3"+str(len(instances))] = 1.0
-        instances.append(Instance(featureVector, costs))
+
+        # print "Feature vector is",featureVector
+        trainingInstances.append(Instance(featureVector, costs))
         #print instances[-1].costs
 
-    random.shuffle(instances)
-    #instances = instances[:100]
-    # Keep some instances to check the performance
-    testingInstances = instances[int(len(instances) * 0.75) + 1:]
-    trainingInstances = instances[:int(len(instances) * 0.75)]
+    random.shuffle(trainingInstances)
+
+    print "Reading test data\n"
+
+    for i,line in enumerate(testDataLines):
+        print "Reading line ", i
+        featureVector = mydefaultdict(mydouble)
+        featureDict = line.split()
+        for featureID,featureVal in enumerate(featureDict):
+            featureVector[featureID] = float(id(intern(featureVal)))
+            #featureVector["dummy"+str(len(instances))] = 1.0
+            #featureVector["dummy2"+str(len(instances))] = 1.0
+            #featureVector["dummy3"+str(len(instances))] = 1.0
+        testingInstances.append(Instance(featureVector))
+        #print instances[-1].costs
+
+    random.shuffle(testingInstances)
 
     print "training data: " + str(len(trainingInstances)) + " instances"
     #trainingInstances = Instance.removeHapaxLegomena(trainingInstances)
@@ -561,10 +603,20 @@ if __name__ == "__main__":
     # the penultimate parameter is True for AROW, false for PA
     # the last parameter can be set to True if probabilities are needed.
     classifier_p = AROW.trainOpt(trainingInstances, 10, [0.01, 0.1, 1.0, 10, 100], 0.1, True, False)
-
-    cost = classifier_p.batchPredict(testingInstances)
+    cost, predictions = classifier_p.batchPredict(testingInstances)
+    "Predictions are ",predictions
     avgCost = float(cost)/len(testingInstances)
     print "Avg Cost per instance " + str(avgCost) + " on " + str(len(testingInstances)) + " testing instances"
+
+    print "Outputting prediction file\n"
+
+    f = open(predictFile, 'w')
+
+    for i, prediction in enumerate(predictions):
+        line = int(prediction) + " " + str(i)
+        f.write(line+"\n")
+
+    f.close()
 
     #avgRatio = classifier_p.batchPredict(testingInstances, True)
     #print "entropy sums: " + str(avgRatio)
