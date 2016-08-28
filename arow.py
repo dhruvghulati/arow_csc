@@ -5,7 +5,6 @@ from mydouble import mydouble, counts
 import cPickle as pickle
 import gzip
 from operator import itemgetter
-
 import random
 import math
 import numpy
@@ -22,6 +21,8 @@ def train_instance_from_svm_input(line):
     featureDict = details[1].split()
     for pair in costDict:
         label, cost = pair.split(":")
+        # Account for infinity
+        # if cost is not "inf" else float(1e10)
         costs[label] = float(cost)
     for featureID,featureVal in enumerate(featureDict):
         featureVector[featureID] = float(id(intern(featureVal)))
