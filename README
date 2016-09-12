@@ -1,1 +1,1 @@
-	Adaptation of the AROW implementation by Andreas Vlachos to perform cost sensitive classification for sentence level features and multi-class cost sensitive classification without binary -1 or +1 predictions, and large sparse feature vectors similar to the vowpal csoaa format.
+Adaptation of the AROW implementation by Andreas Vlachos to perform cost sensitive classification for sentence level features and multi-class cost sensitive classification without binary -1 or +1 predictions, and large sparse feature vectors similar to the vowpal csoaa format.
