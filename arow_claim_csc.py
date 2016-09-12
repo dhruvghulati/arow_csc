@@ -1,5 +1,9 @@
 '''
 
+This outputs prediction files with and without probabilities for separate folders using the AROW algorithm, preserving the name of the file.
+
+Needs to be run on a bash script.
+
 python src/main/arow_claim_csc.py data/output/zero/arow_test/closed_cost_1.dat data/output/zero/arow_test/test.dat data/output/zero/arow_test/predict/closed_cost_1.predict data/output/zero/arow_test/probPredict/closed_cost_1.probpredict
 
 '''

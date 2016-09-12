@@ -9,6 +9,30 @@ import random
 import math
 import numpy
 
+def train_instance_from_list(costDict, featureList):
+    """
+    Generate an Instance from a set of training instances with costs. The input is a list of features e.g. words, vectorized. Note, the vectorizer is the only way of mapping each word to a unique ID.
+    """
+    featureVector = mydefaultdict(mydouble)
+
+    for featureID,featureVal in enumerate(featureList):
+        # This makes word features sparse
+        if featureVal!=0:
+            featureVector[featureID] = featureVal
+
+    return Instance(featureVector, costDict)
+
+def test_instance_from_list(featureList):
+    featureVector = mydefaultdict(mydouble)
+
+    for featureID,featureVal in enumerate(featureList):
+        # This makes word features sparse
+        if featureVal!=0:
+            featureVector[featureID] = featureVal
+
+    # print "Test feature vector is",featureVector
+    return Instance(featureVector)
+
 
 def train_instance_from_svm_input(line):
     """
